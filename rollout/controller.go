@@ -1070,3 +1070,26 @@ func (c *rolloutContext) updateReplicaSetFallbackToPatch(ctx context.Context, rs
 	}
 	return rs, err
 }
+
+func (c *rolloutContext) verifyReplicaSetVersion(ctx context.Context, rs *appsv1.ReplicaSet) error {
+	rsGet, err := c.kubeclientset.AppsV1().ReplicaSets(rs.Namespace).Get(ctx, rs.Name, metav1.GetOptions{})
+	if os.Getenv("ARGO_ROLLOUTS_LOG_RS_DIFF_REPLICAS") == "true" {
+		if err != nil {
+			return fmt.Errorf("error getting replicaset in verifyReplicaSetVersion %s: %w", rs.Name, err)
+		}
+		rsGetJson, err := json.Marshal(rsGet)
+		if err != nil {
+			return fmt.Errorf("error marshalling informer replicaset in verifyReplicaSetVersion %s: %w", rs.Name, err)
+		}
+		rsCopyJson, err := json.Marshal(rs)
+		if err != nil {
+			return fmt.Errorf("error marshalling memory replicaset in verifyReplicaSetVersion %s: %w", rs.Name, err)
+		}
+		c.log.Infof("API    RS: %s", rsGetJson)
+		c.log.Infof("Memory RS: %s", rsCopyJson)
+	}
+	if rs.ResourceVersion != rsGet.ResourceVersion {
+		c.replicaSetInformer.GetIndexer().Update(rsGet)
+	}
+	return nil
+}
