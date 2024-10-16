@@ -1076,7 +1076,7 @@ func (c *rolloutContext) verifyReplicaSetVersion(ctx context.Context, rs *appsv1
 	if err != nil {
 		return err
 	}
-	if os.Getenv("ARGO_ROLLOUTS_LOG_RS_DIFF_REPLICAS") == "true" {
+	if os.Getenv("ARGO_ROLLOUTS_LOG_RS_DIFF") == "true" && rs.ResourceVersion != rsGet.ResourceVersion {
 		if err != nil {
 			return fmt.Errorf("error getting replicaset in verifyReplicaSetVersion %s: %w", rs.Name, err)
 		}
