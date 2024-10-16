@@ -582,7 +582,6 @@ func isWaitingForReplicaSetScaleDown(r *v1alpha1.Rollout, newRS, stableRS *appsv
 }
 
 func (c *rolloutContext) calculateRolloutConditions(newStatus v1alpha1.RolloutStatus) v1alpha1.RolloutStatus {
-	ctx := context.TODO()
 	isPaused := len(c.rollout.Status.PauseConditions) > 0 || c.rollout.Spec.Paused
 	isAborted := c.pauseContext.IsAborted()
 
@@ -648,7 +647,6 @@ func (c *rolloutContext) calculateRolloutConditions(newStatus v1alpha1.RolloutSt
 				// avoid any timeouts.
 				reason = conditions.ReplicaSetNotAvailableReason
 				msg = conditions.NotAvailableMessage
-				c.verifyReplicaSetVersion(ctx, c.stableRS)
 			} else {
 				reason = conditions.ReplicaSetUpdatedReason
 			}

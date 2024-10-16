@@ -1,6 +1,7 @@
 package rollout
 
 import (
+	"context"
 	"github.com/argoproj/argo-rollouts/pkg/apis/rollouts/v1alpha1"
 	analysisutil "github.com/argoproj/argo-rollouts/utils/analysis"
 	log "github.com/sirupsen/logrus"
@@ -49,7 +50,15 @@ type rolloutContext struct {
 }
 
 func (c *rolloutContext) reconcile() error {
+	ctx := context.TODO()
 	err := c.checkPausedConditions()
+	if err != nil {
+		return err
+	}
+	err = c.verifyReplicaSetVersion(ctx, c.stableRS)
+	if err != nil {
+		return err
+	}
 	if err != nil {
 		return err
 	}
