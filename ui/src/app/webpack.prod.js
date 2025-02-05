@@ -7,7 +7,9 @@ module.exports = merge(common, {
     mode: 'production',
     devtool: 'source-map',
     plugins: [
-        new MiniCssExtractPlugin(),
+        new MiniCssExtractPlugin({
+            filename: '[name].[contenthash].css'
+        }),
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify('production'),
         }),
@@ -15,9 +17,19 @@ module.exports = merge(common, {
     module: {
         rules: [
             {
-                test: /\.css$/i,
-                use: [MiniCssExtractPlugin.loader, 'css-loader'],
-            },
+                test: /\.(sa|sc|c)ss$/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            importLoaders: 2,
+                            url: false
+                        }
+                    },
+                    'sass-loader'
+                ]
+            }
         ],
     },
 });
