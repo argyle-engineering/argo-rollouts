@@ -29,13 +29,17 @@ FROM --platform=$BUILDPLATFORM docker.io/library/node:18 AS argo-rollouts-ui
 WORKDIR /src
 ADD ["ui/package.json", "ui/yarn.lock", "./"]
 
+# First install to update yarn.lock
 RUN yarn install --network-timeout 300000
+# Then install with frozen lockfile to ensure consistency
+RUN yarn install --frozen-lockfile --network-timeout 300000
 
 ADD ["ui/", "."]
 
 ARG ARGO_VERSION=latest
 ENV ARGO_VERSION=$ARGO_VERSION
-RUN NODE_ENV='production' yarn build
+ENV VERSION=$ARGO_VERSION
+RUN NODE_OPTIONS=--max-old-space-size=4096 NODE_ENV='production' yarn build
 
 ####################################################################################################
 # Rollout Controller Build stage which performs the actual build of argo-rollouts binaries
